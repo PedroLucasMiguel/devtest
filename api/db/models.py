@@ -19,6 +19,7 @@ class Demand(Base):
         ForeignKey("Elevators.id", ondelete="CASCADE"))
 
 
+# Table that will store elevators
 class Elevator(Base):
     __tablename__ = "Elevators"
     id: Mapped[Integer] = mapped_column(autoincrement=True, primary_key=True)
