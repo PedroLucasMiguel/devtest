@@ -48,6 +48,14 @@ def create_demand(db: Session, demand: demand.DemandCreate) -> models.Demand | N
     # If not items where found, return none
     if db_elevator_item == None:
         return None
+    
+    # Checking if source floor is invalid 0 < source <= db_elevator_item.n_floors
+    if demand.source > db_elevator_item.n_floors or demand.source <= 0:
+        return None
+    
+    # Checking if destination floor is invalid 0 < destination <= db_elevator_item.n_floors
+    if demand.destination > db_elevator_item.n_floors or demand.destination <= 0:
+        return None
 
     db_item = models.Demand(**demand.model_dump(exclude={"elevator_id"}))
     db_elevator_item.demands.append(db_item)

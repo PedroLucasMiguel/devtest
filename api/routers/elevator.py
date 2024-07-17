@@ -12,7 +12,7 @@ router = APIRouter()
 
 # Retrieve elevator info by Id
 @router.get(ROUTER_PATH+"/get/{id}")
-async def get_elevator(id: Annotated[int, Path(ge=0)], response: Response, db: Session = Depends(get_db)):
+async def get_elevator(id: Annotated[int, Path(gt=0)], response: Response, db: Session = Depends(get_db)):
     item = crud.get_elevator(db, id)
 
     # Checking if the item was actually found
