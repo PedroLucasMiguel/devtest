@@ -38,7 +38,7 @@ async def create_elevator(body: elevator.ElevatorCreate, response: Response, db:
 
 # Edit elevator by Id
 @router.put(ROUTER_PATH+"/edit/{id}")
-async def edit_elevator(id: int, body: elevator.ElevatorCreate, response: Response, db: Session = Depends(get_db)):
+async def edit_elevator(id: Annotated[int, Path(gt=0)], body: elevator.ElevatorCreate, response: Response, db: Session = Depends(get_db)):
 
     # Checking the number of floors
     if body.n_floors <= 0:
@@ -57,7 +57,7 @@ async def edit_elevator(id: int, body: elevator.ElevatorCreate, response: Respon
 
 # Delete elevator by Id
 @router.delete(ROUTER_PATH+"/delete")
-async def delete_elevator(id: int, response: Response, db: Session = Depends(get_db)):
+async def delete_elevator(id: Annotated[int, Path(gt=0)], response: Response, db: Session = Depends(get_db)):
     r_affected = crud.remove_elevator(db, id)
 
     # Checking if
@@ -69,7 +69,7 @@ async def delete_elevator(id: int, response: Response, db: Session = Depends(get
 
 # Retrieve all demand from a elevator
 @router.get(ROUTER_PATH+"/{id}/demands")
-async def get_demands_from_elevator(id: int, response: Response, db: Session = Depends(get_db)):
+async def get_demands_from_elevator(id: Annotated[int, Path(gt=0)], response: Response, db: Session = Depends(get_db)):
     item = crud.get_elevator(db, id)
 
     # Checking if the item was actually found
