@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from pydantic.types import datetime
-from utils import WeekDay
+from .utils import WeekDay
 
 # Base class for a demand
 class DemandBase(BaseModel):
@@ -21,4 +21,4 @@ class Demand(DemandBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
