@@ -1,11 +1,13 @@
+from datetime import datetime
 from pydantic import BaseModel
-from pydantic.types import datetime
 from .utils import WeekDay
 
 # Base class for a demand
 class DemandBase(BaseModel):
-    timestamp: datetime
-    weekday: WeekDay
+    # We must ask for a timestamp from the "elevator" in order to avoid delays
+    # with the API, wich could make the data useless.
+    timestamp: datetime 
+    week_day: WeekDay
     source: int
     destination: int
     elevator_id: int

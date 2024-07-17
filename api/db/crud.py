@@ -40,8 +40,17 @@ def get_demand(db: Session, demand_id: int) -> models.Demand:
     return db.query(models.Demand).filter(models.Demand.id == demand_id).first()
 
 
-def create_demand(db: Session, demand: demand.DemandCreate, elevator_id: int) -> models.Demand:
-    db_item = models.Demand(**demand.model_dump(), elevator_id=elevator_id)
+def create_demand(db: Session, demand: demand.DemandCreate) -> models.Demand | None:
+
+    db_elevator_item = db.query(models.Elevator).filter(
+        models.Elevator.id == demand.elevator_id).first()
+
+    # If not items where found, return none
+    if db_elevator_item == None:
+        return None
+
+    db_item = models.Demand(**demand.model_dump(exclude={"elevator_id"}))
+    db_elevator_item.demands.append(db_item)
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
