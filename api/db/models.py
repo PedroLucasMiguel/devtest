@@ -28,4 +28,4 @@ class Elevator(Base):
     n_floors: Mapped[int]
 
     # One to many with demands
-    demands: Mapped[List["Demand"]] = relationship(backref="Elevators")
+    demands: Mapped[List["Demand"]] = relationship(backref="Elevators", cascade="all, delete")

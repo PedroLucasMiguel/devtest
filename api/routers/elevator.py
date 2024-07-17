@@ -56,16 +56,16 @@ async def edit_elevator(id: Annotated[int, Path(gt=0)], body: elevator.ElevatorC
 
 
 # Delete elevator by Id
-@router.delete(ROUTER_PATH+"/delete")
+@router.delete(ROUTER_PATH+"/delete/{id}")
 async def delete_elevator(id: Annotated[int, Path(gt=0)], response: Response, db: Session = Depends(get_db)):
-    r_affected = crud.remove_elevator(db, id)
+    deleted = crud.remove_elevator(db, id)
 
     # Checking if
-    if r_affected == 0:
+    if not deleted:
         response.status_code = status.HTTP_404_NOT_FOUND
         return f"No matches found for ID: {id}."
 
-    return f"{r_affected} rows affected."
+    return f"Elevator with Id {id} removed."
 
 # Retrieve all demand from a elevator
 @router.get(ROUTER_PATH+"/{id}/demands")

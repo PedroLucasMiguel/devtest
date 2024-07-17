@@ -50,10 +50,10 @@ async def edit_demand(id: Annotated[int, Path(gt=0)], body: demand.DemandCreate,
 # Delete demand by Id
 @router.delete(ROUTER_PATH+"/delete")
 async def delete_demand(id: Annotated[int, Path(gt=0)], response: Response, db: Session = Depends(get_db)):
-    r_affected = crud.remove_demand(db, id)
+    deleted = crud.remove_demand(db, id)
 
-    if r_affected == 0:
+    if not deleted:
         response.status_code = status.HTTP_404_NOT_FOUND
         return f"No matches found for ID: {id}."
 
-    return f"{r_affected} rows affected."
+    return f"Demand with Id {id} removed."

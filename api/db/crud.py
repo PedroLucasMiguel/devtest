@@ -27,12 +27,16 @@ def update_elevator(db: Session, elevator_id: int, updated_elevator: elevator.El
     return r_affected
 
 
-def remove_elevator(db: Session, elevator_id: int) -> None:
-    r_affected = db.query(models.Elevator).filter(
-        models.Elevator.id == elevator_id).delete()
-    if (r_affected > 0):
-        db.commit()
-    return r_affected
+def remove_elevator(db: Session, elevator_id: int) -> bool:
+    elevator = db.query(models.Elevator).filter(
+        models.Elevator.id == elevator_id).first()
+    
+    if (elevator == None):
+        return False
+    
+    db.delete(elevator)
+    db.commit()
+    return True
 
 
 # Demands CRUD
@@ -71,9 +75,13 @@ def update_demand(db: Session, demand_id: int, updated_demand: demand.DemandCrea
     db.commit()
 
 
-def remove_demand(db: Session, demand_id: int) -> int:
-    r_affected = db.query(models.Demand).filter(
-        models.Demand.id == demand_id).delete()
-    if (r_affected > 0):
-        db.commit()
-    return r_affected
+def remove_demand(db: Session, demand_id: int) -> bool:
+    demand = db.query(models.Demand).filter(
+        models.Elevator.id == demand_id).first()
+    
+    if (demand == None):
+        return False
+    
+    db.delete(demand)
+    db.commit()
+    return True
