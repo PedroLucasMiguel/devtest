@@ -9,7 +9,7 @@ intervals = 30 seconds
 from datetime import datetime, timedelta
 import numpy as np
 import requests
-from typing import Any
+from typing import Any, Tuple
 import json
 
 API_URL = "http://127.0.0.1:8000"
@@ -45,6 +45,13 @@ def add_demand(timestamp: datetime, week_day: str, source_floor: int, destinatio
     return None
 
 
+def retrieve_dataset_json(elevator_id: int) -> Tuple[bool, requests.Response]:
+    dt_json = requests.get(f"{API_URL}/dataset/generate/{elevator_id}")
+    if dt_json.status_code != 200:
+        return (False, dt_json)
+    return (True, dt_json)
+
+
 def main():
 
     n_floors = 12
@@ -64,30 +71,41 @@ def main():
     prev_floor = 2
 
     for week_day in WEEK_DAYS:
-        start_time = datetime.fromisoformat(f"2024-07-17 {hour}:{minutes}:00.000")
+        start_time = datetime.fromisoformat(
+            f"2024-07-17 {hour}:{minutes}:00.000")
 
         while start_time.hour != stop_hour:
             start_time += timedelta(minutes=minutes_increment)
-            action = np.random.choice(["Move", "Rest"], 1, p=[call_prob, rest_prob])
+            action = np.random.choice(["Move", "Rest"], 1, p=[
+                                      call_prob, rest_prob])
 
             if action == "Move":
                 floors = list(range(1, n_floors+1))
                 floors.remove(prev_floor)
                 destination_floor = int(np.random.choice(floors))
                 response = add_demand(start_time, week_day,
-                                    prev_floor, destination_floor, elevator)
+                                      prev_floor, destination_floor, elevator)
                 prev_floor = destination_floor
 
             else:
                 response = add_demand(start_time, week_day,
-                                    prev_floor, prev_floor, elevator)
+                                      prev_floor, prev_floor, elevator)
 
             if type(response) == str:
                 print(f"Error! API request failed.\n{response}")
                 return
-        
+
         print(f"Finished simulation for {week_day}")
-    
+
+    with open("dt.json", "w") as f:
+        response = retrieve_dataset_json(elevator)
+        if not response[0]:
+            print(f"Error! API request failed.\n{response[1].text}")
+            return
+        json.dump(response[1].json(), f)
+
+    print("Dataset generated successfully!")
+
 
 if __name__ == "__main__":
     main()

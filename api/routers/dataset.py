@@ -13,7 +13,7 @@ ROUTER_PATH = "/dataset"
 router = APIRouter()
 
 
-@router.get(ROUTER_PATH+"generate/{id}")
+@router.get(ROUTER_PATH+"/generate/{id}")
 async def generate_dataset_from_elevator_id(id: Annotated[int, Path(gt=0)], response: Response, db: Session = Depends(get_db)):
     elevator = crud.get_elevator(db, id)
 
