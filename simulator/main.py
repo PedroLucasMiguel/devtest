@@ -20,7 +20,7 @@ WEEK_DAYS = ["Sunday", "Monday", "Tuesday",
 def setup_simulation_enviroment(n_floors: int) -> int | Any:
 
     create_elevator_response = requests.post(
-        API_URL+"/elevator/create", data=json.dumps({"section": "simulation", "n_floors": n_floors}))
+        API_URL+"/elevator/create", data=json.dumps({"name": "simulation", "n_floors": n_floors}))
 
     if create_elevator_response.status_code != 200:
         return create_elevator_response.json()

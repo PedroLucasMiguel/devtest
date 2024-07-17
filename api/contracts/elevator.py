@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 # Base class for a elevator
 class ElevatorBase(BaseModel):
-    section: str
+    name: str
     n_floors: int
 
 # Abstraction from the base class to make the creation process easier

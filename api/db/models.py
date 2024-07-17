@@ -24,7 +24,7 @@ class Demand(Base):
 class Elevator(Base):
     __tablename__ = "Elevators"
     id: Mapped[int] = mapped_column(autoincrement=True, primary_key=True)
-    section: Mapped[str]
+    name: Mapped[str]
     n_floors: Mapped[int]
 
     # One to many with demands

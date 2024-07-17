@@ -1,12 +1,11 @@
-from sqlalchemy.orm import Session
-
+from sqlalchemy.orm import Session, Query
+from typing import Tuple
 from . import models
 from contracts import demand, elevator
 
+
 # Elevator CRUD
-
-
-def get_elevator(db: Session, elevator_id: int) -> models.Elevator:
+def get_elevator(db: Session, elevator_id: int) -> models.Elevator | None:
     return db.query(models.Elevator).filter(models.Elevator.id == elevator_id).first()
 
 
@@ -18,22 +17,24 @@ def create_elevator(db: Session, elevator: elevator.ElevatorCreate) -> models.El
     return db_item
 
 
-def update_elevator(db: Session, elevator_id: int, updated_elevator: elevator.ElevatorCreate) -> int:
-    r_affected = db.query(models.Elevator).filter(models.Elevator.id ==
-                                                  elevator_id).update(updated_elevator.model_dump())
+def update_elevator(db: Session, elevator_id: int, updated_elevator: elevator.ElevatorCreate) -> Tuple[int, models.Elevator]:
+    elevator = db.query(models.Elevator).filter(
+        models.Elevator.id == elevator_id)
+    r_affected = elevator.update(updated_elevator.model_dump())
+
     if r_affected > 0:
         db.commit()
 
-    return r_affected
+    return (r_affected, elevator.first())
 
 
 def remove_elevator(db: Session, elevator_id: int) -> bool:
     elevator = db.query(models.Elevator).filter(
         models.Elevator.id == elevator_id).first()
-    
+
     if (elevator == None):
         return False
-    
+
     db.delete(elevator)
     db.commit()
     return True
@@ -49,18 +50,6 @@ def create_demand(db: Session, demand: demand.DemandCreate) -> models.Demand | N
     db_elevator_item = db.query(models.Elevator).filter(
         models.Elevator.id == demand.elevator_id).first()
 
-    # If not items where found, return none
-    if db_elevator_item == None:
-        return None
-    
-    # Checking if source floor is invalid 0 < source <= db_elevator_item.n_floors
-    if demand.source > db_elevator_item.n_floors or demand.source <= 0:
-        return None
-    
-    # Checking if destination floor is invalid 0 < destination <= db_elevator_item.n_floors
-    if demand.destination > db_elevator_item.n_floors or demand.destination <= 0:
-        return None
-
     db_item = models.Demand(**demand.model_dump(exclude={"elevator_id"}))
     db_elevator_item.demands.append(db_item)
     db.add(db_item)
@@ -69,19 +58,23 @@ def create_demand(db: Session, demand: demand.DemandCreate) -> models.Demand | N
     return db_item
 
 
-def update_demand(db: Session, demand_id: int, updated_demand: demand.DemandCreate) -> None:
-    db.query(models.Elevator).filter(models.Elevator.id ==
-                                     demand_id).update(**updated_demand.model_dump())
-    db.commit()
+def update_demand(db: Session, demand_id: int, updated_demand: demand.DemandCreate) -> Tuple[int, models.Elevator]:
+    demand = db.query(models.Demand).filter(models.Demand.id == demand_id)
+    r_affected = demand.update(updated_demand.model_dump())
+
+    if r_affected > 0:
+        db.commit()
+
+    return (r_affected, demand.first())
 
 
 def remove_demand(db: Session, demand_id: int) -> bool:
     demand = db.query(models.Demand).filter(
-        models.Elevator.id == demand_id).first()
-    
+        models.Demand.id == demand_id).first()
+
     if (demand == None):
         return False
-    
+
     db.delete(demand)
     db.commit()
     return True

@@ -3,4 +3,5 @@ __pycache__/
 *$py.class
 venv
 api/*.db
+api/.pytest_cache
 simulator/*.json
