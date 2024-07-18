@@ -4,8 +4,6 @@ from .utils import WeekDay
 
 # Base class for a demand
 class DemandBase(BaseModel):
-    # We must ask for a timestamp from the "elevator" in order to avoid delays
-    # with the API, wich could make the data useless.
     timestamp: datetime 
     week_day: WeekDay
     source: int

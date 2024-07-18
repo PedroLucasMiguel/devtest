@@ -1,10 +1,9 @@
+from typing import List
 from datetime import datetime
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from typing import List
 
 from .config import Base
-
 
 # Table that will store all demands from the elevator
 class Demand(Base):

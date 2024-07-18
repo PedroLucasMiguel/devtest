@@ -1,45 +1,58 @@
-from fastapi import APIRouter, Response, status, Depends, Path
-from fastapi.responses import JSONResponse
 import pandas as pd
-import numpy as np
+from typing import Annotated
 from sqlalchemy.orm import Session
+from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Response, status, Depends, Path
+
 from db import crud
 from dependencies import get_db
-from typing import Annotated
 from contracts.utils import WeekDayToNumerical
 
 ROUTER_PATH = "/dataset"
 
 router = APIRouter()
 
+# Getting a dataset from a elevator_id
+@router.get(ROUTER_PATH + "/generate/{elevator_id}")
+async def generate_dataset_from_elevator_id(elevator_id: Annotated[int, Path(gt=0)],
+                                            response: Response,
+                                            db: Session = Depends(get_db)):
+    elevator = crud.get_elevator(db, elevator_id)
 
-@router.get(ROUTER_PATH+"/generate/{id}")
-async def generate_dataset_from_elevator_id(id: Annotated[int, Path(gt=0)], response: Response, db: Session = Depends(get_db)):
-    elevator = crud.get_elevator(db, id)
-
+    # Checking if the provided elevator exists
     if elevator == None:
         response.status_code = status.HTTP_404_NOT_FOUND
-        return f"ID {id} not found."
+        return {"message": f"Elevator with ID {elevator_id} not found."}
 
     demands = elevator.demands
 
+    # Checking if the elevator does have demands
     if len(demands) == 0:
         response.status_code = status.HTTP_403_FORBIDDEN
-        return f"The elevator with Id {id} does not have demands to generate a dataset"
+        return {"message": 
+                f"The elevator with ID {elevator_id} does not have demands to generate a dataset"}
 
-    temp_data = []
+    '''
+    To generate a dataset from the data that we save in our DB, I considered the following:
+    - The year and the day of a demand will not contribute to the classification;
+    - De timestamp of the demand can be converted into a single value by converting the time
+      into hours (0.0->24.0);
+    - The destination floor should be used as the class for each entry in the dataframe;
+    - The classes would be in the format: 
+      [0 = don't move (resting), 1 = go to the 1st floor, 2 = go to the 2nd floor, ...]
+    '''
+
+    # Generating dataset
+    data = []
     for demand in demands:
-        temp_data.append([
-            (demand.timestamp.hour*3600) +
-            (demand.timestamp.minute*60) + demand.timestamp.second,
+        data.append([
+            (demand.timestamp.hour) +
+            (demand.timestamp.minute/60) + demand.timestamp.second/3600, # Converting HH:MM:SS into seconds
             WeekDayToNumerical[demand.week_day],
             demand.source,
-            demand.destination if demand.source != demand.destination else 0])
+            demand.destination if demand.source != demand.destination else 0])# Checking if the elevator was resting 
 
-    return JSONResponse(pd.DataFrame(temp_data, columns=[
-        "time", "weekday", "floor", "class"], dtype=np.int32).to_dict(orient="index"))
+    df = pd.DataFrame(data, columns=["hours", "weekday", "source_floor", "class"])
 
-
-@router.get(ROUTER_PATH)
-async def root():
-    return "Hello World!"
+    # Creating the dataframe and exporting it into a JSON file
+    return JSONResponse(df.to_dict(orient="index"))

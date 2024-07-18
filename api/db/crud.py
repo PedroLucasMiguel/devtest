@@ -1,27 +1,33 @@
-from sqlalchemy.orm import Session, Query
 from typing import Tuple
+from sqlalchemy.orm import Session
+
 from . import models
 from contracts import demand, elevator
 
 
-# Elevator CRUD
+# ------------------------- Elevator CRUD --------------------------------------------
 def get_elevator(db: Session, elevator_id: int) -> models.Elevator | None:
     return db.query(models.Elevator).filter(models.Elevator.id == elevator_id).first()
 
 
 def create_elevator(db: Session, elevator: elevator.ElevatorCreate) -> models.Elevator:
     db_item = models.Elevator(**elevator.model_dump())
+
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
     return db_item
 
 
-def update_elevator(db: Session, elevator_id: int, updated_elevator: elevator.ElevatorCreate) -> Tuple[int, models.Elevator]:
+def update_elevator(db: Session, 
+                    elevator_id: int, 
+                    updated_elevator: elevator.ElevatorCreate) -> Tuple[int, models.Elevator]:
     elevator = db.query(models.Elevator).filter(
         models.Elevator.id == elevator_id)
+    
     r_affected = elevator.update(updated_elevator.model_dump())
 
+    # Only commits if something was really affected
     if r_affected > 0:
         db.commit()
 
@@ -32,21 +38,22 @@ def remove_elevator(db: Session, elevator_id: int) -> bool:
     elevator = db.query(models.Elevator).filter(
         models.Elevator.id == elevator_id).first()
 
+    # If elevator does not exists, exit
     if (elevator == None):
         return False
 
     db.delete(elevator)
     db.commit()
     return True
+# -----------------------------------------------------------------------------------
 
-
-# Demands CRUD
+# ------------------------- Demands CRUD --------------------------------------------
 def get_demand(db: Session, demand_id: int) -> models.Demand:
     return db.query(models.Demand).filter(models.Demand.id == demand_id).first()
 
 
 def create_demand(db: Session, demand: demand.DemandCreate) -> models.Demand | None:
-
+    # Getting the elevator in order to link to the demand
     db_elevator_item = db.query(models.Elevator).filter(
         models.Elevator.id == demand.elevator_id).first()
 
@@ -58,10 +65,13 @@ def create_demand(db: Session, demand: demand.DemandCreate) -> models.Demand | N
     return db_item
 
 
-def update_demand(db: Session, demand_id: int, updated_demand: demand.DemandCreate) -> Tuple[int, models.Elevator]:
+def update_demand(db: Session, 
+                  demand_id: int, 
+                  updated_demand: demand.DemandCreate) -> Tuple[int, models.Elevator]:
     demand = db.query(models.Demand).filter(models.Demand.id == demand_id)
     r_affected = demand.update(updated_demand.model_dump())
-
+    
+    # Only commits if something was really affected
     if r_affected > 0:
         db.commit()
 
@@ -72,6 +82,7 @@ def remove_demand(db: Session, demand_id: int) -> bool:
     demand = db.query(models.Demand).filter(
         models.Demand.id == demand_id).first()
 
+    # If demand does not exists, exit
     if (demand == None):
         return False
 
