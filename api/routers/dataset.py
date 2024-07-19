@@ -36,20 +36,23 @@ async def generate_dataset_from_elevator_id(elevator_id: Annotated[int, Path(gt=
     To generate a dataset from the data that we save in our DB, I considered the following:
     - The year and the day of a demand will not contribute to the classification;
     - De timestamp of the demand can be converted into a single value by converting the time
-      into hours (0.0->24.0);
+      into hours and then normalized to values between 0.0 and 1.0;
+    - The week day is a super meaningful information;
     - The destination floor should be used as the class for each entry in the dataframe;
     - The classes would be in the format: 
       [0 = don't move (resting), 1 = go to the 1st floor, 2 = go to the 2nd floor, ...]
+
+    ALL FEATURES (hour, week_day, source_floor) SHOULD BE NORMALIZED TO [0.0, 1.0]
     '''
 
     # Generating dataset
     data = []
     for demand in demands:
         data.append([
-            (demand.timestamp.hour) +
-            (demand.timestamp.minute/60) + demand.timestamp.second/3600, # Converting HH:MM:SS into seconds
-            WeekDayToNumerical[demand.week_day],
-            demand.source,
+            ((demand.timestamp.hour) +
+            (demand.timestamp.minute/60) + demand.timestamp.second/3600)/24.0, # Converting timestamp to hours and normalizing
+            WeekDayToNumerical[demand.week_day]/len(WeekDayToNumerical.keys()), # Week Day "normalized"
+            demand.source/elevator.n_floors, # "Normalized" source_floor
             demand.destination if demand.source != demand.destination else 0])# Checking if the elevator was resting 
 
     df = pd.DataFrame(data, columns=["hours", "weekday", "source_floor", "class"])

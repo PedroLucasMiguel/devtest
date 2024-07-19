@@ -17,8 +17,8 @@ START_HOUR = "06" # Hour to start the simulation, must be in 00 format
 START_MINUTES = "00" # Minutes to start the simulation, must be in 00 format
 STOP_HOUR = 19 # Hour to stop the simulation, must be in between 0 <= STOP_HOUR <= 24
 MINUTES_INCREMENT = 30 # Minute increment for each iteration
-CALL_PROB = 0.65 # Probability of the elevator to be called
-REST_PROB = 0.35 # Probability of the elevator to stay in the same spot
+CALL_PROB = 0.90 # Probability of the elevator to be called
+REST_PROB = 0.10 # Probability of the elevator to stay in the same spot
 
 
 # Initialize the simulation enviroment by creating a test elevator
