@@ -16,7 +16,7 @@ N_FLOORS = 12 # N° of floors for the mock elevator
 START_HOUR = "06" # Hour to start the simulation, must be in 00 format
 START_MINUTES = "00" # Minutes to start the simulation, must be in 00 format
 STOP_HOUR = 19 # Hour to stop the simulation, must be in between 0 <= STOP_HOUR <= 24
-MINUTES_INCREMENT = 2 # Minute increment for each iteration
+MINUTES_INCREMENT = 30 # Minute increment for each iteration
 CALL_PROB = 0.65 # Probability of the elevator to be called
 REST_PROB = 0.35 # Probability of the elevator to stay in the same spot
 
@@ -82,7 +82,7 @@ def main():
         start_time = datetime.fromisoformat(
             f"2024-07-17 {START_HOUR}:{START_MINUTES}:00.000")
 
-        while start_time.hour != START_HOUR:
+        while start_time.hour != STOP_HOUR:
             # Incrementing the time
             start_time += timedelta(minutes=MINUTES_INCREMENT)
 
@@ -94,7 +94,7 @@ def main():
                 # Moving the elevator by adding a demand with a random floor
                 floors = list(range(1, N_FLOORS+1))
                 floors.remove(prev_floor)
-                destination_floor = np.random.choice(floors, 1) # HERE
+                destination_floor = int(np.random.choice(floors))
                 response = add_demand(start_time, week_day,
                                       prev_floor, destination_floor, elevator)
                 prev_floor = destination_floor
