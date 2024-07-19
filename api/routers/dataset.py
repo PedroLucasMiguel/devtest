@@ -42,6 +42,14 @@ async def generate_dataset_from_elevator_id(elevator_id: Annotated[int, Path(gt=
     - The classes would be in the format: 
       [0 = don't move (resting), 1 = go to the 1st floor, 2 = go to the 2nd floor, ...]
 
+    Dataset features:
+    hour (normalized, [0,1])
+    weekday (normalized, [0, 1])
+    source_floor (normalized [0, 1])
+
+    Class:
+    destination_floor  
+    
     ALL FEATURES (hour, week_day, source_floor) SHOULD BE NORMALIZED TO [0.0, 1.0]
     '''
 
